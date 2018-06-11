@@ -11,3 +11,5 @@
 1. Right-click on *References* in the *Solution Explorer*.
 2. Select *Add Reference*.
 3. In the *Browse* tab select `plin.exe`. You may need to click browse to add the proper file to the list.
+
+You might want to use *plin.xml* file so Visual Studio would provide you a description on each function and type.
