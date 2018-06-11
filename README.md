@@ -1,4 +1,4 @@
-# plinProject
+# p-lin Project
 A simple project for testing image interpolation and an implementation of my own pixel-art scaling methods.
 
 ## Goal and Purpose
