@@ -1,0 +1,811 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>plin</name>
+    </assembly>
+    <members>
+        <member name="T:Casting.ImPoint`1">
+            <summary>
+            An ImagePoint structure for any kind of values
+            (used in this project for integer coordinates).
+            </summary>
+            <typeparam name="T">Numeric class</typeparam>
+        </member>
+        <member name="F:Casting.ImPoint`1.ix">
+            <summary>
+            The X coordinate of the point.
+            </summary>
+        </member>
+        <member name="F:Casting.ImPoint`1.iy">
+            <summary>
+            They Y coordinate of the point.
+            </summary>
+        </member>
+        <member name="T:Casting.ImPoint">
+            <summary>
+            A general ImagePoint structure for floating-point
+            (single precision) coordiantes.
+            </summary>
+        </member>
+        <member name="F:Casting.ImPoint.ix">
+            <summary>
+            The X coordinate of the point.
+            </summary>
+        </member>
+        <member name="F:Casting.ImPoint.iy">
+            <summary>
+            The Y coordinate of the point.
+            </summary>
+        </member>
+        <member name="T:Casting.InterpPoint1D">
+            <summary>
+            An one-dimensional interpolation point - composition of
+            a floating-point precision value (reference/normalized point)
+            and an integer index for addressing table cells. Used for
+            postionoing coefficients obtained from interpolation algorithm.
+            </summary>
+        </member>
+        <member name="F:Casting.InterpPoint1D.ni">
+            <summary>
+            A precision value [0:1] for information where between two point
+            the interpolated point is being located (normalized position).
+            </summary>
+        </member>
+        <member name="F:Casting.InterpPoint1D.i">
+            <summary>
+            The left-most position of an original images's pixel which
+            the obtained coefficients are applied to.
+            </summary>
+        </member>
+        <member name="T:Casting.InterpPoint2D">
+            <summary>
+            A two-dimensional interpolation point - a composition of normalized
+            to [0:1] coordinate point and an integer coordinates of a reference
+            point in the original image.
+            </summary>
+        </member>
+        <member name="F:Casting.InterpPoint2D.nPoint">
+            <summary>
+            A normalized position of the interpolated point - a cast to [0:1]
+            values between bounding points.
+            </summary>
+        </member>
+        <member name="F:Casting.InterpPoint2D.I0">
+            <summary>
+            A position of the most top-left point of the original image. Used for
+            positioning the interpolation coefficients.
+            </summary>
+        </member>
+        <member name="T:Casting.Cast1D">
+            <summary>
+            A one-dimensional casting function delegate. Provides a position of
+            the interpolated point in the original image's space.
+            </summary>
+            <param name="n">Position in the target image.</param>
+            <returns>Position in the original image.</returns>
+        </member>
+        <member name="T:Casting.Cast2D">
+            <summary>
+            A two-dimensional casting function delegate. Provides a position of
+            the interpolated point in the original image's space.
+            </summary>
+            <param name="nx">The X coordinate of the interpolated
+            point in the target image's coordinates.</param>
+            <param name="ny">The Y coordinate of the interpolated
+            point in the target image's coordinates.</param>
+            <returns>Position in the original image.</returns>
+        </member>
+        <member name="T:Casting.Blending2D">
+            <summary>
+            A two-dimensional function used for cutting out edges of
+            the output image. It returns an alpha parameter (opacity)
+            for a given point of the picture.
+            </summary>
+            <param name="nx">The X coordinate of the interpolated point
+            in the original image's coordinates.</param>
+            <param name="ny">The Y coordinate of the interpolated point
+            in the original image's coordinates.</param>
+            <returns>Value of the alpha parameter.</returns>
+        </member>
+        <member name="T:Casting.TransitionFunction">
+            <summary>
+            A simple transition function. It casts values from range 0-1 to 0-1.
+            </summary>
+            <param name="x">An input value from a range of [0,1].</param>
+            <returns>An output value from a range of [0,1].</returns>
+        </member>
+        <member name="T:Casting.Function">
+            <summary>
+            A static class for combining casting functions and generating
+            pre-defined casting functions.
+            </summary>
+        </member>
+        <member name="M:Casting.Function.CombineCasting(Casting.Cast1D,Casting.Cast1D)">
+            <summary>
+            Combines two one-dimensional casting functions into a two-dimensional one.
+            </summary>
+            <param name="castX">A casting function for coordinaes along the X axis.</param>
+            <param name="castY">A casting function for coordinaes along the Y axis.</param>
+            <returns>A composite two-dimensional casting function.</returns>
+        </member>
+        <member name="M:Casting.Function.GenFastCasting(System.Int32,System.Int32)">
+            <summary>
+            Genarates a fast casting function - a linear transition from 0 to last index.
+            Results in small zoom and cuts edges off.
+            </summary>
+            <param name="originalLength">Size of the original image in a given dimension.</param>
+            <param name="targetLength">Size of the target image in the same dimension.</param>
+            <returns>A one-dimensional casting function.</returns>
+        </member>
+        <member name="M:Casting.Function.GenProperCasting(System.Int32,System.Int32)">
+            <summary>
+            Genarates a proper casting function where pixels in both target and original image
+            are positioned in accordance to their centers.
+            </summary>
+            <param name="originalLength">Size of the original image in a given dimension.</param>
+            <param name="targetLength">Size of the target image in the same dimension.</param>
+            <returns>A one-dimensional casting function.</returns>
+        </member>
+        <member name="M:Casting.Function.GenBufferCasting(System.Int32,Casting.Cast1D)">
+            <summary>
+            Creates a buffer for a one-dimensional casting function.
+            </summary>
+            <param name="targetLength">Size of the target image in a given dimension.</param>
+            <param name="casting">Casting function.</param>
+            <returns>The buffered casting function.</returns>
+        </member>
+        <member name="M:Casting.Function.FromTransformationMatrix(Transformations.TransformationMatrix,System.Single,System.Single)">
+            <summary>
+            Generates a two-dimensional casting function from a transformation matrix.
+            </summary>
+            <param name="t">A transformation matrix.</param>
+            <param name="correctionX">A correction of X-axis coordinates. 0.5 places
+            points in the middle of the pixels.</param>
+            <param name="correctionY">A correction of Y-axis coordinates. 0.5 places
+            points in the middle of the pixels.</param>
+            <returns>A two-dimensional casting function.</returns>
+        </member>
+        <member name="M:Casting.Function.FromTransformationMatrix(Transformations.TransformationMatrix,System.Single)">
+            <summary>
+            Generates a two-dimensional casting function from a transformation matrix.
+            </summary>
+            <param name="t">A transformation matrix.</param>
+            <param name="coordCorrection">A correction of X-axis and Y-axis coordinates. 0.5 places
+            points in the middle of the pixels.</param>
+            <returns>A two-dimensional casting function.</returns>
+        </member>
+        <member name="M:Casting.Function.FastBlendingFromCasting(Casting.Cast2D,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Generates a fast blending function for a given casting function. Each point
+            within defined borders will be passed as a visible, each outside as a transparent.
+            </summary>
+            <param name="casting">A casting function.</param>
+            <param name="xRange">A range in X-axis that is supposed to be a part
+            of the image on the left and right side. (0.5 is a good, standard value.)</param>
+            <param name="yRange">A range in Y-axis that is supposed to be a part
+            of the image on the top and bottom side. (0.5 is a good, standard value.)</param>
+            <param name="originalWidth">Width of the original image.</param>
+            <param name="originalHeight">Height of the original image.</param>
+            <returns>Blending function.</returns>
+        </member>
+        <member name="M:Casting.Function.BlendingFromCasting(Casting.Cast2D,Casting.TransitionFunction,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Generates a fast blending function for a given casting function using
+            a given blending function. Each point within defined borders will be
+            passed as a visible, each outside as a transparent.
+            
+            Points on the borders will be passed by a transition function
+            (0 means point being closer to inside).
+            </summary>
+            <param name="casting">A casting function.</param>
+            <param name="blending">A blending function in a form of a transition function.</param>
+            <param name="xRange">A range in X-axis that is supposed to be a part
+            of the image on the left and right side. (0.5 is a good, standard value.)</param>
+            <param name="yRange">A range in Y-axis that is supposed to be a part
+            of the image on the top and bottom side. (0.5 is a good, standard value.)</param>
+            <param name="originalWidth">Width of the original image.</param>
+            <param name="originalHeight">Height of the original image.</param>
+            <returns>Blending function.</returns>
+        </member>
+        <member name="F:Casting.Function.LinearBlending">
+            <summary>
+            A linear blending function (from 0, which is assigned 1, to 1,
+            which is assigned 0).
+            </summary>
+        </member>
+        <member name="F:Casting.Function.PointBlending">
+            <summary>
+            A point (step) blending function (equivallent to the nearest neighbour).
+            Values lower than 0.5 are assigned 1.
+            </summary>
+        </member>
+        <member name="F:Casting.Function.PlinBlending">
+            <summary>
+            A p-lin blending function (from 0, which is assigned 1, to 1,
+            which is assigned 0).
+            </summary>
+        </member>
+        <member name="T:Transformations.TransformationMatrix">
+            <summary>
+            A structure representing an affine transformation matrix
+            for a two-dimensional space.
+            |   Ax   Ax_cy  bx  | |x|
+            | Ay_cx    Ay   by  | |y|
+            |   0      0    1   | |1|
+            </summary>
+        </member>
+        <member name="M:Transformations.TransformationMatrix.ApplyAfter(Transformations.TransformationMatrix)">
+            <summary>
+            Get a transformation matrix that is obtained by applying
+            this matrix after another.
+            </summary>
+            <param name="m">The matrix to be applied as first.</param>
+            <returns>The resulting transformation matrix.</returns>
+        </member>
+        <member name="M:Transformations.TransformationMatrix.ApplyBefore(Transformations.TransformationMatrix)">
+            <summary>
+            Get a transformation matrix that is obtained by applying
+            this matrix before another.
+            </summary>
+            <param name="m">The matrix to be applied as second.</param>
+            <returns>The resulting transformation matrix.</returns>
+        </member>
+        <member name="M:Transformations.TransformationMatrix.Apply(Casting.ImPoint)">
+            <summary>
+            Get a point by using this transformation matrix.
+            </summary>
+            <param name="p">Image point to cast.</param>
+            <returns>The point after the transformation.</returns>
+        </member>
+        <member name="P:Transformations.TransformationMatrix.UnityTransformation">
+            <summary>
+            Returns a unity transformation matrix.
+            </summary>
+        </member>
+        <member name="T:Transformations.TransformationPrototype">
+            <summary>
+            A prototype of transformation for casting between two images, which one is being
+            considered as an original and second as a target.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationPrototype.T_Original2Target">
+            <summary>
+            A transformation matrix for casting original image's coordinates into
+            target image's cooridnate space. 
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationPrototype.T_Target2Original">
+            <summary>
+            A transformation matrix for casting target image's cooridinates into
+            original image's coordinate space.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationPrototype.TargetWidth">
+            <summary>
+            Width of the target image.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationPrototype.TargetHeight">
+            <summary>
+            Height of the target image.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationPrototype.OriginalWidth">
+            <summary>
+            Width of the original image.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationPrototype.OriginalHeight">
+            <summary>
+            Height of the original image.
+            </summary>
+        </member>
+        <member name="T:Transformations.TransformationSetup">
+            <summary>
+            A struct for holding information needed to generate a transformation prototype.
+            The order of operations: translation, scaling, rotation. Expansion can be after
+            or before them all and in each case it relies on original coordinate space and size.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.RotationAngle">
+            <summary>
+            An angle of rotation (anti-clockwise).
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.RotationRescaling">
+            <summary>
+            Is rotation supposed to rescale the image.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.RotationInDegrees">
+            <summary>
+            Is rotation angle given in degrees. If not, then in radians.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ScalingX">
+            <summary>
+            A scaling value along the X-axis.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ScalingY">
+            <summary>
+            A scaling value along the Y-axis.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.RelativeScaling">
+            <summary>
+            Are both scaling values represent a scaling factors? If not,
+            then they represent the target size.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.TranslateX">
+            <summary>
+            How many pixels move the image along the X-axis (right-positive).
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.TranslateY">
+            <summary>
+            How many pixles move the image along the Y-axis (bottom-positive).
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ExpandLeft">
+            <summary>
+            Image expansion on the left in pixels.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ExpandTop">
+            <summary>
+            Image expansion on the top in pixels.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ExpandRight">
+            <summary>
+            Image expansion on the right in pixels.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ExpandBottom">
+            <summary>
+            Image expansion on the bottom in pixels.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.ApplyExpansionLast">
+            <summary>
+            If expansion should be applied as last. If so, it will cut out
+            the image to the bounds based on original dimensions.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.OriginalWidth">
+            <summary>
+            Width of the original image.
+            </summary>
+        </member>
+        <member name="F:Transformations.TransformationSetup.OriginalHeight">
+            <summary>
+            Height of the original image.
+            </summary>
+        </member>
+        <member name="M:Transformations.TransformationSetup.CalculateTransformation">
+            <summary>
+            Calculates a transformation prototype from current setup.
+            </summary>
+            <returns>A transformation prototype.</returns>
+        </member>
+        <member name="M:Transformations.TransformationSetup.WidthAfterRotationDgr(System.Double,System.Single,System.Single)">
+            <summary>
+            Calculates width of the image after a rotation.
+            </summary>
+            <param name="angle_degrees">Rotation angle in degrees.</param>
+            <param name="originalWidth">Width before the rotation.</param>
+            <param name="originalHeight">Height before the rotation.</param>
+            <returns>Width after the rotation.</returns>
+        </member>
+        <member name="M:Transformations.TransformationSetup.HeightAfterRotationDgr(System.Double,System.Single,System.Single)">
+            <summary>
+            Calculates height of the image after a rotation.
+            </summary>
+            <param name="angle_degrees">Rotation angle in degrees.</param>
+            <param name="originalWidth">Width before the rotation.</param>
+            <param name="originalHeight">Height before the rotation.</param>
+            <returns>Height after the rotation.</returns>
+        </member>
+        <member name="M:Transformations.TransformationSetup.WidthAfterRotationRad(System.Double,System.Single,System.Single)">
+            <summary>
+            Calculates width of the image after a rotation.
+            </summary>
+            <param name="angle_radians">Rotation angle in radians.</param>
+            <param name="originalWidth">Width before the rotation.</param>
+            <param name="originalHeight">Height before the rotation.</param>
+            <returns>Width after the rotation.</returns>
+        </member>
+        <member name="M:Transformations.TransformationSetup.HeightAfterRotationRad(System.Double,System.Single,System.Single)">
+            <summary>
+            Calculates height of the image after a rotation.
+            </summary>
+            <param name="angle_radians">Rotation angle in radians.</param>
+            <param name="originalWidth">Width before the rotation.</param>
+            <param name="originalHeight">Height before the rotation.</param>
+            <returns>Height after the rotation.</returns>
+        </member>
+        <member name="T:Interpolations.Interpolate1D">
+            <summary>
+            A delegate for a one-dimanesional interpolation function that turns
+            a normalized position (values [0:1]) into an array of coefficients. Indices
+            of the points which the coefficients are applied to are obtained through
+            different function.
+            </summary>
+            <param name="ni">A normalized position of the interpolated point.</param>
+            <returns>An array of coefficients.</returns>
+        </member>
+        <member name="T:Interpolations.Interpolate2D">
+            <summary>
+            A delegate for a two-dimanesional interpolation function that turns
+            a normalized point into a two-dimnesional array of coefficients. Indices
+            of the points which the coefficients are applied to are obtained through
+            different function.
+            </summary>
+            <param name="nix">A normalized X coordinate of the interpolated point.</param>
+            <param name="niy">A normalized Y coordinate of the interpolated point.</param>
+            <returns>A matrix of wages.</returns>
+        </member>
+        <member name="T:Interpolations.Interp1DStart">
+            <summary>
+            A delegate for an one-dimensional function for getting values to obtain coefficients
+            and to position them.
+            </summary>
+            <param name="i">A position of the interpolated point in the original image's coordinates.</param>
+            <returns>A positioning point - a normalized value and the left-most index
+            in the original image's coordinates for positioning the wages.</returns>
+        </member>
+        <member name="T:Interpolations.Interp2DStart">
+            <summary>
+            A delegate for a two-dimensional function for getting values to obtain coefficients
+            and position them.
+            </summary>
+            <param name="ix">The X coordinate of the interpolated point
+            in the original image's coordinates.</param>
+            <param name="iy">The Y coordinate of the interpolated point
+            in the original image's coordinates.</param>
+            <returns>A positioning point - normalized value and the most top-left
+            indices in the original image's coordinates for positioning the coefficients.</returns>
+        </member>
+        <member name="T:Interpolations.PBCCFunc">
+            <summary>
+            A delegate for PBCC process.
+            </summary>
+            <param name="w">A two-dimensional array of coefficients (matrix).</param>
+            <param name="nix">A normalized X coordiante of the interpolated point.</param>
+            <param name="niy">A normalized Y coordinate of the interpolated point.</param>
+            <returns>Corrected coefficients using the PBCC algorithm.</returns>
+        </member>
+        <member name="T:Interpolations.TransitionReductionFunc">
+            <summary>
+            A delegate for a transition-reduction function.
+            </summary>
+            <param name="nix">A normalized X coordinate of the interpolated point.</param>
+            <param name="niy">A normalized Y coordinate of the interpolated point.</param>
+            <returns>New positions (normalized).</returns>
+        </member>
+        <member name="T:Interpolations.Interpolations">
+            <summary>
+            A static class for generating interpolation functions.
+            </summary>
+        </member>
+        <member name="M:Interpolations.Interpolations.CombineInterpolations(Interpolations.Interpolate1D,Interpolations.Interpolate1D)">
+            <summary>
+            Combines two one-dimensional interpolation functions into a two-dimensional one.
+            </summary>
+            <param name="interpolateX">The interpolation function along the X axis.</param>
+            <param name="interpolateY">The interpolation function along the Y axis.</param>
+            <returns>A composite two-dimensional interpolation function.</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.CombineInterpolations(Interpolations.Interpolate1D,Interpolations.Interpolate1D,System.Int32,System.Int32)">
+            <summary>
+            Combines two one-dimensional interpolation functions into a two-dimensional one
+            with set size of the output matrix.
+            </summary>
+            <param name="interpolateX">The interpolation function along the X axis.</param>
+            <param name="interpolateY">The interpolation function along the Y axis.</param>
+            <param name="_width">Width of the output matrix (along the X axis).</param>
+            <param name="_height">Height of the output matrix (along the Y axis).</param>
+            <returns>A composite two-dimensional interpolation function.</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.CombineStarts(Interpolations.Interp1DStart,Interpolations.Interp1DStart)">
+            <summary>
+            Combines two one-dimensional positioning functions for interpolation purposes.
+            </summary>
+            <param name="posX">A positioning function for the interpolation along the X axis.</param>
+            <param name="posY">A positioning function for the interpolation along the Y axis.</param>
+            <returns>A composite positioning function.</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenLinear">
+            <summary>
+            Generates an one-dimensional linear interpolation function.
+            </summary>
+            <returns>Linear interpolation</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenPlin">
+            <summary>
+            Generates an one-dimensional p-lin interpolation function.
+            </summary>
+            <returns>P-lin interpolation</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenNearest">
+            <summary>
+            Generates an one-dimensional nearest neighbour algorithm.
+            </summary>
+            <returns>Nearest neighbour</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenFromPassage(Casting.TransitionFunction)">
+            <summary>
+            Generates an one-dimensional interpolation function from a given transition function.
+            </summary>
+            <param name="passageFunction">A transition function.</param>
+            <returns>A custom interpolation function.</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenClassicStart">
+            <summary>
+            Generates an one-dimensional positioning function for classical two-point interpolations
+            (nearest neighbour, linear, p-lin).
+            </summary>
+            <returns>Positioning function.</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenProximityBasedCoefficientCorrection(Interpolations.Interpolations.ProximityBasedCoefficientReduction)">
+            <summary>
+            Generates the proximity-based coefficient correction algorithm.
+            </summary>
+            <param name="mode">A selected variant of the PBCC algorihtm.</param>
+            <returns>PBCC algorithm.</returns>
+        </member>
+        <member name="M:Interpolations.Interpolations.GenTransitionReduction(System.Single,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Generates a transition reduction function for given transition in the target image.
+            </summary>
+            <param name="targetTransition">Size of passage (in pixels) in the target image</param>
+            <param name="targetWidth">Width of the target image</param>
+            <param name="targetHeight">Height of the target image.</param>
+            <param name="originalWidth">Width of the original image.</param>
+            <param name="originalHeight">Height of the original image.</param>
+            <returns>TAR function.</returns>
+        </member>
+        <member name="T:Interpolations.Interpolations.ProximityBasedCoefficientReduction">
+            <summary>
+            Pre-defined distance waging algorithms.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interpolations.ProximityBasedCoefficientReduction.None">
+            <summary>
+            No PBCC (use null for Resizer class instead).
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interpolations.ProximityBasedCoefficientReduction.Full">
+            <summary>
+            Full, proper PBCC.
+            </summary>
+        </member>
+        <member name="T:Interpolations.Interpolations.Implemented">
+            <summary>
+            Pre-defined interpolation algorithms.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interpolations.Implemented.NearestNeighbour">
+            <summary>
+            Nearest neighbour algorithm (with rounding down of the positions of 0.5).
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interpolations.Implemented.Linear">
+            <summary>
+            Bilinear interpolation.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interpolations.Implemented.PLin">
+            <summary>
+            D-lin interpolation.
+            </summary>
+        </member>
+        <member name="T:Interpolations.Interp">
+            <summary>
+            A class for holding a set up parameters and functions for a given interpolation of two images.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interp.Interpolation">
+            <summary>
+            The two-dimensional interpolation function in use.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interp.PositionWages">
+            <summary>
+            The positioning function for the interpolation function in use.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interp.TransitionReduction">
+            <summary>
+            The transition reduction function in use for current dimensions of images. Null if none.
+            </summary>
+        </member>
+        <member name="F:Interpolations.Interp.ProximityBasedCoefficientCorrection">
+            <summary>
+            The PBCC algorithm in use. Null if none.
+            </summary>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeResize(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            An initialization for dimnesions and a casting function
+            (Casting.Function.GenProperCasting will be used).
+            </summary>
+            <param name="originalWidth">Width of the original image.</param>
+            <param name="originalHeight">Height of the original image.</param>
+            <param name="targetWidth">Width of the target image.</param>
+            <param name="targetHeight">Height of the target image.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeResize(System.Int32,System.Int32,System.Int32,System.Int32,Casting.Cast1D)">
+            <summary>
+            An initialization for dimanesions and a casting function (the given casting
+            function will be used for both X and Y axis - use for square images).
+            </summary>
+            <param name="originalWidth">Width of the original image.</param>
+            <param name="originalHeight">Height of the original image.</param>
+            <param name="targetWidth">Width of the target image.</param>
+            <param name="targetHeight">Height of the target image.</param>
+            <param name="casting">A casting function.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeResize(System.Int32,System.Int32,System.Int32,System.Int32,Casting.Cast1D,Casting.Cast1D)">
+            <summary>
+            An initialization for dimensions and casting functions
+            (both functions have to be provided).
+            </summary>
+            <param name="originalWidth">Width of the original image.</param>
+            <param name="originalHeight">Height of the original image.</param>
+            <param name="targetWidth">Width of the target image.</param>
+            <param name="targetHeight">Height of the target image.</param>
+            <param name="castingX">A casting function along the X axis.</param>
+            <param name="castingY">A casting function along the Y axis.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeFunctions(Interpolations.Interpolations.Implemented,Interpolations.Interpolations.ProximityBasedCoefficientReduction,System.Single)">
+            <summary>
+            An initialization for interpolation functions - interpolation, positioning,
+            transition reduction and PBCC.
+            </summary>
+            <param name="interp">One of the pre-defined interpolations.</param>
+            <param name="pbcc">One of the pre-defined PBCC algorithms.</param>
+            <param name="reduceTransition">A value of the transition reduction (pixels).
+            Zero or negative means no transition reduction function will be used.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeFunctions(Interpolations.Interpolations.Implemented,Interpolations.Interpolations.ProximityBasedCoefficientReduction)">
+            <summary>
+            An initialization for interpolation functions - interpolation, positioning
+            and PBCC. No transition reduction.
+            </summary>
+            <param name="interp">One of the pre-defined interpolations.</param>
+            <param name="pbcc">One of the pre-defined PBCC algorithms.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeFunctions(Interpolations.Interpolations.Implemented,System.Single)">
+            <summary>
+            An initialization for interpolation functions - interpolation, positioning
+            and transition reduction. PBCC won't be used.
+            </summary>
+            <param name="interp">One of the pre-defined interpolations.</param>
+            <param name="reduceTransition">Value of the transition reduction (pixels). Negative value means
+            that a nieghbourhood pull will be used instead. Zero means no transition reduction function will
+            be used.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializeFunctions(Interpolations.Interpolations.Implemented)">
+            <summary>
+            An initialization for interpolation functions. No transition reduction and PBCC.
+            </summary>
+            <param name="interp">One of the pre-defined interpolations.</param>
+        </member>
+        <member name="M:Interpolations.Interp.InitializePassageReduction(System.Single)">
+            <summary>
+            Initialization for custom transition reduction function.
+            </summary>
+            <param name="reduceTransition">Size of the transition in the target image (pixels). If zero or
+            lower - no transition reduction.</param>
+        </member>
+        <member name="P:Interpolations.Interp.CastPosition">
+            <summary>
+            [Read-only] The two-dimensional casting function to convert target image's
+            coordinates to original image's coordinates.
+            </summary>
+        </member>
+        <member name="P:Interpolations.Interp.OriginalWidth">
+            <summary>
+            [Read-only] Width of the original image for the current settings of interpolation.
+            </summary>
+        </member>
+        <member name="P:Interpolations.Interp.OriginalHeight">
+            <summary>
+            [Read-only] Height of the original image for the current settings of interpolation.
+            </summary>
+        </member>
+        <member name="P:Interpolations.Interp.TargetWidth">
+            <summary>
+            [Read-only] Width of the target image for the current settings of interpolation.
+            </summary>
+        </member>
+        <member name="P:Interpolations.Interp.TargetHeight">
+            <summary>
+            [Read-only] Height of the target image for the current settings of interpolation.
+            </summary>
+        </member>
+        <member name="T:Processing.Image">
+            <summary>
+            A simple, byte-based, three-dimensional representation of an image (for purposes of
+            multi-threading, not locked).
+            </summary>
+        </member>
+        <member name="T:Processing.Resizer">
+            <summary>
+            Class for resizing an image using a given interpolation.
+            </summary>
+        </member>
+        <member name="F:Processing.Resizer.Original">
+            <summary>
+            The original image.
+            </summary>
+        </member>
+        <member name="F:Processing.Resizer.Result">
+            <summary>
+            The target image. Number of colours must match number of colours in
+            the original image. Have to be user-defined.
+            </summary>
+        </member>
+        <member name="F:Processing.Resizer.Interpolation">
+            <summary>
+            An interpolation setup. The dimensions must match dimensions of both the original
+            and the target image.
+            </summary>
+        </member>
+        <member name="M:Processing.Resizer.Resize">
+            <summary>
+            Safe resize function.
+            </summary>
+            <returns>If false - missing one of the elements (image, interpolation setup) or missing
+            current function. If true - the image has been resized.</returns>
+        </member>
+        <member name="M:Processing.Resizer.Reset(System.Boolean)">
+            <summary>
+            Sets current function to safe option.
+            </summary>
+            <param name="allowParallel">Will the safe option be a parallel variant?</param>
+        </member>
+        <member name="M:Processing.Resizer.Optimalize(System.Boolean)">
+            <summary>
+            Select a current resize function according to current interpolation setup. Better optimization
+            if the original image is defined.
+            </summary>
+            <param name="allowParallel">Will the optimalized function be a parallel variant?</param>
+            <returns>If false, no interpolation setup. If true, the resizer has been optimalized.</returns>
+        </member>
+        <member name="M:Processing.Resizer.FastResize">
+            <summary>
+            Resize without checking if all elements are in place (faster).
+            </summary>
+        </member>
+        <member name="M:Processing.Resizer.ForceParallelResize">
+            <summary>
+            Forces resize with a safe parallel resize function.
+            </summary>
+        </member>
+        <member name="M:Processing.Resizer.ForceSingleResize">
+            <summary>
+            Forces resize with a safe singe-thread resize function.
+            </summary>
+        </member>
+        <member name="M:Processing.Resizer.Buffer">
+            <summary>
+            Buffers all coeffcients obtained by the current setting.
+            </summary>
+            <returns>True, if the buffering was successfull.</returns>
+        </member>
+        <member name="M:Processing.Resizer.RemoveBuffer">
+            <summary>
+            Removes current buffer.
+            </summary>
+        </member>
+        <member name="P:Processing.Resizer.IsBuffered">
+            <summary>
+            If the last resizer setting was buffered.
+            </summary>
+        </member>
+    </members>
+</doc>
